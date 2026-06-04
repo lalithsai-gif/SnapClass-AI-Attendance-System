@@ -23,6 +23,14 @@ def style_background_dashboard():
                 .stApp{
                     background: #E0E3FF !important;
                 }  
+
+            #MainMenu,footer,header{
+                visibility: hidden;
+            }
+            
+            .block-container{
+                padding-top:0rem !important
+            }
     </style>
     """,unsafe_allow_html=True)
 
