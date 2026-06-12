@@ -9,7 +9,10 @@ def teacher_screen():
 #     st.markdown("""
 #     <h2>Teacher Screen</h2>
 # """,unsafe_allow_html=True)
-    teacher_screen_login()
+    if 'teacher_login_type' not in st.session_state or st.session_state.teacher_login_type=="login":
+        teacher_screen_login()
+    elif st.session_state.teacher_login_type=="register":
+        teacher_screen_register()
     
 
 def teacher_screen_login():
@@ -23,8 +26,8 @@ def teacher_screen_login():
     st.header("Login using password",text_alignment='center')
     st.space()
     st.space()
-    teacher_username=st.text_input("Enter username",placeholder='any name')
-    teacher_password=st.text_input("Enter password",type='password',placeholder="Enter password")
+    teacher_username=st.text_input("Enter username",placeholder='your username')
+    teacher_password=st.text_input("Enter password",type='password',placeholder="your password")
 
     st.divider()
 
@@ -32,7 +35,8 @@ def teacher_screen_login():
     with btnc1:
         st.button('Login',shortcut='control+enter',icon=':material/passkey:',width='stretch')
     with btnc2:
-        st.button('Register Instead',type='primary',icon=':material/passkey:',width='stretch')
+        if st.button('Register Instead',type='primary',icon=':material/passkey:',width='stretch'):
+            st.session_state.teacher_login_type='register'
     footer_dashboard()
 
 
@@ -47,14 +51,19 @@ def teacher_screen_register():
     st.header("Register Your Teacher Profile")
     st.space()
     st.space()
-    teacher_username=st.text_input("Enter username",placeholder='any name')
+    teacher_username=st.text_input("Enter username",placeholder='Username')
+    teacher_name=st.text_input("Enter name",placeholder='Your name')
     teacher_password=st.text_input("Enter password",type='password',placeholder="Enter password")
+    teacher_cnf_pass=st.text_input("Confirm Your password",placeholder='Enter password',type='password')
 
     st.divider()
 
     btnc1,btnc2=st.columns(2)
     with btnc1:
-        st.button('Login',shortcut='control+enter',icon=':material/passkey:',width='stretch')
+        st.button('Register',shortcut='alt+enter',type='primary',icon=':material/passkey:',width='stretch')
     with btnc2:
-        st.button('Register Instead',type='primary',icon=':material/passkey:',width='stretch')
+        if st.button('Login Instead',icon=':material/passkey:',width='stretch'):
+            st.session_state.teacher_login_type='login'
+        
     footer_dashboard()
+    
