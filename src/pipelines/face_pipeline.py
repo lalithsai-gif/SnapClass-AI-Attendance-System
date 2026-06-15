@@ -16,7 +16,7 @@ def load_dlib_models():
         face_recognition_models.pose_predictor_model_location()
     )
 
-    facerec=dlib.face_recognition_models_v1(
+    facerec=dlib.face_recognition_model_v1(
         face_recognition_models.face_recognition_model_location()
     )
 
@@ -53,20 +53,20 @@ def get_trained_model():
             X.append(np.array(embedding))
             y.append(student.get('student_id'))
 
-        if len(X)==0:
-            return 0
+    if len(X)==0:
+        return 0
         
-        clf=SVC(kernel='linear',probability=True,class_weight='balanced')
+    clf=SVC(kernel='linear',probability=True,class_weight='balanced')
 
-        try:
-            clf.fit(X,y)
-        except ValueError:
-            pass
+    try:
+        clf.fit(X,y)
+    except ValueError:
+        pass
 
-        return {'clf':clf,'X':X,'y':y}
+    return {'clf':clf,'X':X,'y':y}
 
 def train_classifier():
-    st.cache_resources.clear()
+    st.cache_resource.clear()
     model_data=get_trained_model()
 
     return bool(model_data)
@@ -74,7 +74,7 @@ def train_classifier():
 def predict_attendance(class_image_np):
     encodings=get_face_embeddings(class_image_np)
 
-    detected_students=[]
+    detected_students={}
 
     model_data=get_trained_model()
 
