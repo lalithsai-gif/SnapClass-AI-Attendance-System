@@ -5,6 +5,15 @@ from src.components.footer import footer_dashboard
 from src.database.db import check_teacher_exists,create_teacher,teacher_login,get_teacher_subject
 from src.components.dialog_create_subject import create_subject_dialog
 from src.components.subject_card import subject_card
+from src.components.dialog_share_subject import share_subject_dialog
+from src.components.dialog_add_photo import add_photo_dialog
+from src.pipelines.face_pipeline import predict_attendance
+from src.database.config import supabase
+import numpy as np
+import pandas as pd
+from datetime import datetime
+from src.components.dialog_attendance_results import attendance_result_dialog
+from src.components.dialog_voice_attendance import voice_attendance_dialog
 
 def teacher_screen():
     style_background_dashboard()
@@ -64,7 +73,102 @@ def teacher_dashboard():
     footer_dashboard()
 
 def teacher_tab_take_attendance():
+    teacher_id=st.session_state.teacher_data['teacher_id']
     st.header("Take Ai Attendance")
+
+    if 'attendance_images' not in st.session_state:
+        st.session_state.attendance_images=[]
+    
+    subjects=get_teacher_subject(teacher_id)
+     
+    if not subjects:
+        st.warning("You haven't created any subjects yet! Please create one to begin!")
+        return
+    
+    subject_options={f"{s['name']}-{s['subject_code']}": s['subject_id'] for s in subjects}
+
+    col1,col2=st.columns([3,1],vertical_alignment='bottom')
+
+    with col1:
+        selected_subject_label=st.selectbox('Select Subject',options=list(subject_options.keys()))
+
+    with col2:
+        if st.button('Add Photos',type='primary',icon=':material/photo_prints:',width='stretch'):
+            add_photo_dialog()
+        
+    selected_subject_id=subject_options[selected_subject_label]
+
+    st.divider()
+
+    if st.session_state.attendance_images:
+        st.header('Added Photos')
+        gallery_cols=st.columns(4)
+
+        for idx,img in st.session_state.attendance_images:
+            with gallery_cols[idx % 4]:
+                st.image(img,width='stretch',caption=f'photo {idx+1}')
+
+    has_photos=bool(st.session_state.attendance_images)
+    c1,c2,c3=st.columns(3)
+
+    with c1:
+        if st.button('Clear all photos',type='tertiary',icon=':material/delete:',disabled=not has_photos):
+            st.session_state.attendance_images=[]
+            st.rerun()
+
+    with c2:
+        
+        if st.button('Run Face Analysis',type='secondary',icon=':material/analytics:',disabled=not has_photos):
+            with st.spinner('Deep Scanning Classroom Photos...'):
+                all_detected_ids={}
+
+                for idx,img in enumerate(st.session_state.attendance_images):
+                    img_np=np.array(img.convert('RGB'))
+
+
+                    detected,_,_=predict_attendance(img_np)
+
+                    if detected:
+                        for sid in detected.keys():
+                            student_id=int(sid)
+
+                            all_detected_ids.setdefault(student_id,[]).append(f"photo {idx+1}")
+
+                enrolled_res=supabase.table('subject_students').select("*,students(*)").eq('subject_id',selected_subject_id).execute()  
+                enrolled_students=enrolled_res.data
+
+                if not enrolled_students:
+                    st.warning('No Students in this Course')
+                else:                          
+                    results,attendance_to_log=[],[]
+
+                    current_timestamp=datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+
+                    for node in enrolled_students:
+                        student=node('students')
+                        sources=all_detected_ids.get(int(student['student_id']),[])
+                        is_present=len(sources) > 0
+
+                        results.append({
+                            "Name":student['name'],
+                            "ID":student['student_id'],
+                            "Source": ", ".join(sources) if is_present else "-",
+                            "Status":"✅Present" if is_present else "❌Absent"
+                            })
+                        
+                        attendance_to_log.append({
+                            'student_id':student['student_id'],
+                            'subject_id':selected_subject_id,
+                            'timestamp':current_timestamp,
+                            'is_present':bool(is_present)
+                        })
+                attendance_result_dialog(pd.DataFrame(results),attendance_to_log)
+    with c3:
+        st.button('Use Voice Attendance',type='primary',width='stretch',icon=':material/mic:')
+        voice_attendance_dialog(selected_subject_id)
+
+
+
 
 def teacher_tab_manage_subjects():
     teacher_id=st.session_state.teacher_data['teacher_id']
@@ -78,11 +182,33 @@ def teacher_tab_manage_subjects():
 
     subjects=get_teacher_subject(teacher_id)
     if subjects:
-        for sub in subjects:
-            stats=[
-                ("👥","Students",sub['total_students']),
-                ("🏛️","Classes",sub['total_classes'])
-            ]
+        if "subject_idx" not in st.session_state:
+            st.session_state.subject_idx = 0
+        if st.session_state.subject_idx >= len(subjects):
+            st.session_state.subject_idx = len(subjects) - 1
+
+        idx = st.session_state.subject_idx
+        sub = subjects[idx]
+
+        nav1, nav2, nav3 = st.columns([1, 8, 1])
+
+        with nav1:
+            if st.button("◀️",disabled=(idx == 0),key="prev_subject"):
+                st.session_state.subject_idx -= 1
+                st.rerun()
+        with nav2:
+            st.markdown(
+            f"<div style='text-align:center'><b>{idx+1}/{len(subjects)}</b></div>",
+            unsafe_allow_html=True
+        )
+        with nav3:
+            if st.button("▶️",disabled=(idx == len(subjects)-1),key="next_subject"):
+                st.session_state.subject_idx += 1
+                st.rerun()
+        stats=[
+            ("👥","Students",sub['total_students']),
+            ("🏛️","Classes",sub['total_classes'])
+        ]
         def share_btn():
             if st.button(f"Share Code: {sub['name']}",key=f"share_{sub['subject_code']}",icon=":material/share:"):
                 share_subject_dialog(sub['name'],sub['subject_code'])
