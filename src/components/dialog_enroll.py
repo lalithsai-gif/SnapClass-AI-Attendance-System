@@ -25,4 +25,4 @@ def enroll_dialog():
                     st.rerun()
 
         else:
-            st.warning('Plaese enter a subject code!')
+            st.warning('Please enter a subject code!')

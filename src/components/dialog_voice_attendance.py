@@ -22,12 +22,16 @@ def voice_attendance_dialog(selected_subject_id):
                 st.warning('No Students enrolled in this Course')
                 return
             candidates_dict={
-                s['students']['student_id'] : s['students']['voice_embedding']
-                for s in enrolled_students if s['students'].get('voice_embedding')
+                s['students']['student_id'] : s['students']['voice_embeddings']
+                for s in enrolled_students if s['students'].get('voice_embeddings')
             }
 
             if not candidates_dict:
-                st.error('No enrolled Students have voice profile registed')
+                st.error('No enrolled Students have voice profile registered')
+                return
+            
+            if audio_data is None:
+                st.warning("Please record audio first")
                 return
             
             audio_bytes=audio_data.read()
@@ -39,7 +43,7 @@ def voice_attendance_dialog(selected_subject_id):
             current_timestamp=datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
 
             for node in enrolled_students:
-                student=node('students')
+                student=node['students']
                 score=detected_scores.get(student['student_id'],0.0)
                 is_present=bool(score>0)
 

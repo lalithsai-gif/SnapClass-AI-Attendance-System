@@ -104,7 +104,7 @@ def teacher_tab_take_attendance():
         st.header('Added Photos')
         gallery_cols=st.columns(4)
 
-        for idx,img in st.session_state.attendance_images:
+        for idx,img in enumerate(st.session_state.attendance_images):
             with gallery_cols[idx % 4]:
                 st.image(img,width='stretch',caption=f'photo {idx+1}')
 
@@ -145,7 +145,7 @@ def teacher_tab_take_attendance():
                     current_timestamp=datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
 
                     for node in enrolled_students:
-                        student=node('students')
+                        student=node['students']
                         sources=all_detected_ids.get(int(student['student_id']),[])
                         is_present=len(sources) > 0
 
@@ -164,8 +164,8 @@ def teacher_tab_take_attendance():
                         })
                 attendance_result_dialog(pd.DataFrame(results),attendance_to_log)
     with c3:
-        st.button('Use Voice Attendance',type='primary',width='stretch',icon=':material/mic:')
-        voice_attendance_dialog(selected_subject_id)
+        if st.button('Use Voice Attendance',type='primary',width='stretch',icon=':material/mic:'):
+            voice_attendance_dialog(selected_subject_id)
 
 
 
@@ -238,7 +238,7 @@ def teacher_tab_attendance_records():
     data=[]
 
     for r in records:
-        ts=r.get['timestamp']
+        ts=r.get('timestamp')
 
         data.append({
             "ts_group":ts.split(".")[0] if ts else None,

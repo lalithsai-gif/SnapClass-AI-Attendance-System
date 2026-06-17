@@ -61,7 +61,7 @@ def get_trained_model():
     try:
         clf.fit(X,y)
     except ValueError:
-        pass
+        return None
 
     return {'clf':clf,'X':X,'y':y}
 
@@ -97,7 +97,7 @@ def predict_attendance(class_image_np):
 
         best_match_score=np.linalg.norm(student_embedding-encoding)
 
-        resemble_threshold=0.6
+        resemble_threshold=0.5
 
         if best_match_score <= resemble_threshold:
             detected_students[predicted_id]=True

@@ -45,7 +45,7 @@ def student_dashboard():
     stats_map={}
 
     for log in logs:
-        sid=log['student_id']
+        sid=log['subject_id']
 
         if sid not in stats_map:
             stats_map[sid]={"total":0,"attended":0}
@@ -75,8 +75,8 @@ def student_dashboard():
                 code=sub['subject_code'],
                 section=sub['section'],
                 stats=[
-                    {'📆','Total',stats['total']},
-                    {'✅','Attended',stats['attended']}
+                    ('📆','Total',stats['total']),
+                    ('✅','Attended',stats['attended'])
                 ],
                 footer_callback=unenroll_btn
             )
@@ -124,7 +124,7 @@ def student_screen():
                 if detected:
                     student_id=list(detected.keys())[0]
                     all_students=get_all_students()
-                    student=next((s for s in all_students if s['student_id']),None)
+                    student=next((s for s in all_students if s['student_id']==int(student_id)),None)
 
                     if student:
                         st.session_state.is_logged_in=True
