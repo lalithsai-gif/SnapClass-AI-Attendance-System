@@ -66,10 +66,8 @@ def get_trained_model():
     return {'clf':clf,'X':X,'y':y}
 
 def train_classifier():
-    st.cache_resource.clear()
-    model_data=get_trained_model()
-
-    return bool(model_data)
+    get_trained_model.clear()
+    return bool(get_trained_model())
 
 def predict_attendance(class_image_np):
     encodings=get_face_embeddings(class_image_np)
