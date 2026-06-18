@@ -139,7 +139,7 @@ def student_screen():
     if show_registration:
         with st.container(border=True):
             st.header('Register new Profile')
-            new_name=st.text_input("Enter Your Name",placeholder='E.g. Lalith Dabbiru')
+            new_name=st.text_input("Enter Your Name",placeholder='E.g. Lalithsai Dabbiru')
 
             st.subheader('Optional : Voice Enrollment')
             st.info("Enroll your voice for only attendance")

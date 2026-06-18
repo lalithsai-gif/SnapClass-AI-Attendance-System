@@ -58,8 +58,12 @@ def get_trained_model():
         
     clf=SVC(kernel='linear',probability=True,class_weight='balanced')
 
+    if len(set(y)) < 2:
+        return {'clf': None,'X': X,'y': y}
+
     try:
         clf.fit(X,y)
+        print("Model Trained")
     except ValueError:
         return None
 
@@ -95,7 +99,7 @@ def predict_attendance(class_image_np):
 
         best_match_score=np.linalg.norm(student_embedding-encoding)
 
-        resemble_threshold=0.5
+        resemble_threshold=0.6
 
         if best_match_score <= resemble_threshold:
             detected_students[predicted_id]=True
