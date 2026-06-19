@@ -14,9 +14,8 @@ Built using **Streamlit**, **Supabase**, **Dlib**, and **Machine Learning**, Sna
 
 **Application:**
 
-```text
 https://snapclass-ai-v1.streamlit.app
-```
+
 
 ---
 
@@ -284,33 +283,25 @@ streamlit run app.py
 
 ### Home Page
 
-```text
 ![Home Page](screenshots/home.png)
-```
 
 ### Teacher Dashboard
 
-```text
 ![Teacher Page](screenshots/teacher.png)
-```
 
 ### Student Dashboard
 
-```text
 ![Student Page](screenshots/student.png)
-```
 
 ### Face Attendance
 
-```text
 ![Face Attendance Page](screenshots/FaceAttendance.png)
-```
+
 
 ### Voice Attendance
 
-```text
 ![Voice Attendance Page](screenshots/voiceattendance.png)
-```
+
 
 ---
 
